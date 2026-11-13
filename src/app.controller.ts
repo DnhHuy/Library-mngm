@@ -1,4 +1,15 @@
-import { Body, Controller, Delete, Get, Patch, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Put,
+} from '@nestjs/common';
+
 import { AppService } from './app.service.js';
 import { CreateBookDto } from './dto/createBook.dto.js';
 
@@ -6,23 +17,36 @@ import { CreateBookDto } from './dto/createBook.dto.js';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  // CREATE
   @Post()
-  createBook(@Body() createBookDto: CreateBookDto): createBookDto {
+  createBook(@Body() createBookDto: CreateBookDto) {
     return this.appService.createBook(createBookDto);
   }
 
+  // READ ALL
   @Get()
-  findAll(): createBookDto[] {
-    return this.appService.findAll(CreateBookDto);
+  findAll() {
+    return this.appService.findAll();
   }
 
-  @Patch()
-  updateBook(@Body() createBookDto: CreateBookDto): createBookDto {
-    return this.appService.updateBook(createBookDto);
+  // READ ONE
+  @Get(':id')
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    return this.appService.findOne(id);
   }
 
-  @Delete()
-  deleteBook(@Body() createBookDto: CreateBookDto): CreateBookDto {
-    return this.appService.deleteBook(createBookDto);
+  // UPDATE
+  @Put(':id')
+  updateBook(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateData: Partial<CreateBookDto>,
+  ) {
+    return this.appService.updateBook(id, updateData);
+  }
+
+  // DELETE
+  @Delete(':id')
+  deleteBook(@Param('id', ParseIntPipe) id: number) {
+    return this.appService.deleteBook(id);
   }
 }

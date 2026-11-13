@@ -1,40 +1,66 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
+
 import { CreateBookDto } from './dto/createBook.dto.js';
 
-const idconunt = 1;
+type Book = CreateBookDto & {
+  id: number;
+};
+
+let idCount = 1;
+
 const books: Book[] = [];
 
 @Injectable()
-export class BookService {
+export class AppService {
+  // CREATE
   createBook(createBookDto: CreateBookDto): Book {
     const newBook: Book = {
-      id: idconunt++,
       ...createBookDto,
+      id: idCount++,
     };
+
     books.push(newBook);
+
     return newBook;
   }
 
+  // READ ALL
   findAll(): Book[] {
     return books;
   }
 
-  updateBook(createBookDto: CreateBookDto): Book {
-    const index = books.findIndex((book) => book.id === createBookDto.id);
-    if (index !== -1) {
-      books[index] = { ...books[index], ...createBookDto };
-      return books[index];
+  // READ ONE
+  findOne(id: number): Book {
+    const book = books.find((book) => book.id === id);
+
+    if (!book) {
+      throw new NotFoundException(`Không tìm thấy sách với ID ${id}`);
     }
-    throw new Error('Không tìm thấy sách với ID đã cho');
+
+    return book;
   }
 
-  deleteBook(createBookDto: CreateBookDto): Book {
-    const index = books.findIndex((book) => book.id === createBookDto.id);
-    if (index !== -1) {
-      const deletedBook = books[index];
-      books.splice(index, 1);
-      return deletedBook;
+  // UPDATE
+  updateBook(id: number, updateData: Partial<CreateBookDto>): Book {
+    const book = this.findOne(id);
+
+    Object.assign(book, updateData);
+
+    return book;
+  }
+
+  // DELETE
+  deleteBook(id: number): Book {
+    const index = books.findIndex((book) => book.id === id);
+
+    if (index === -1) {
+      throw new NotFoundException(`Không tìm thấy sách với ID ${id}`);
     }
-    throw new Error('Không tìm thấy sách với ID đã cho');
+
+    const deletedBook = books[index];
+
+    books.splice(index, 1);
+
+    return deletedBook;
   }
 }
